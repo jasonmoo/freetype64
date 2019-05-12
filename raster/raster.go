@@ -53,9 +53,9 @@ type Rasterizer struct {
 	// Linked list of cells, one per row.
 	cellIndex []int
 	// Buffers.
-	cellBuf      [256]cell
-	cellIndexBuf [64]int
-	spanBuf      [64]Span
+	cellBuf      [fixedMult * 4]cell
+	cellIndexBuf [fixedMult]int
+	spanBuf      [fixedMult]Span
 }
 
 // findCell returns the index in r.cell for the cell corresponding to
@@ -477,7 +477,9 @@ func (r *Rasterizer) areaToAlpha(area int) uint32 {
 	// without the +1. Round-to-nearest gives a more symmetric result than
 	// round-down. The C implementation also returns 8-bit alpha, not 16-bit
 	// alpha.
-	a := (area + 1) >> 1
+
+	// TODO: this is likely a hack
+	a := (area + 1) >> (fracWidth + 1)
 	if a < 0 {
 		a = -a
 	}
